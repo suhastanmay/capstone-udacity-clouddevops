@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "EnvironmentName",
+        "ParameterValue": "Udacity-capstone"
+    },
+    {
+        "ParameterKey": "EksRole",
+        "ParameterValue": "arn:aws:iam::254108793338:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS"
+    },
+    {
+        "ParameterKey": "EksNodeRole",
+        "ParameterValue": "arn:aws:iam::254108793338:role/eksctl-capstonecluster-nodegroup-NodeInstanceRole-1D24NQO683602"
+    }
+]

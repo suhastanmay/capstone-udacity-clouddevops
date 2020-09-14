@@ -1,0 +1,113 @@
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names.
+    Type: String
+
+  VPCCIDR:
+    Description: Default is 10.0.0.0/16.
+    Type: String
+    Default: 10.0.0.0/16
+
+  PUBSUBNET1CIDR:
+    Description: Default is 10.0.1.0/24.
+    Type: String
+    Default: 10.0.1.0/24
+
+  PUBSUBNET2CIDR:
+    Description: Default is 10.0.2.0/24.
+    Type: String
+    Default: 10.0.2.0/24
+
+Resources:
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags: 
+        - 
+          Key: Environment
+          Value: !Ref EnvironmentName
+        -
+          Key: Name
+          Value: !Sub ${EnvironmentName}-VPC
+  
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags: 
+        - 
+          Key: Environment
+          Value: !Ref EnvironmentName
+        -
+          Key: Name
+          Value: !Sub ${EnvironmentName}-InternetGateway
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PUBSUBNET1:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PUBSUBNET1CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - 
+          Key: Environment
+          Value: !Ref EnvironmentName
+        -
+          Key: Name
+          Value: !Sub ${EnvironmentName}-PUBSUBNET1
+      VpcId: !Ref VPC
+
+  PUBSUBNET2:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PUBSUBNET2CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - 
+          Key: Environment
+          Value: !Ref EnvironmentName
+        -
+          Key: Name
+          Value: !Sub ${EnvironmentName}-PUBSUBNET2
+      VpcId: !Ref VPC
+
+  PUBROUTETABLE:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        -
+          Key: Name
+          Value: !Sub ${EnvironmentName}-PUBROUTETABLE
+      VpcId: !Ref VPC
+
+  PUBINTERNETROUTE:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PUBROUTETABLE
+
+  PUBROUTEASSOCIATION1:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+          RouteTableId: !Ref PUBROUTETABLE
+          SubnetId: !Ref PUBSUBNET1
+
+  PUBROUTEASSOCIATION2:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+          RouteTableId: !Ref PUBROUTETABLE
+          SubnetId: !Ref PUBSUBNET2
