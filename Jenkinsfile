@@ -8,14 +8,10 @@ pipeline {
   stages {
     stage('Lint HTML'){
       steps{
-          sh  'tidy -q -e *.html'
+          sh  'tidy -q -e index.html'
       }
     }
-    stage('Build & Push to dockerhub'){
-        steps {
-          sh 'sudo bash upload_docker.sh'
-          }
-    }
+
     stage('Create config file cluster') {
     steps {
       withAWS(region:'ap-south-1', credentials:'Jenkins') {
@@ -94,7 +90,7 @@ pipeline {
         }
     }
 
-        stage('Clean Up Green Image'){
+        stage('Clean Up Blue Image'){
             steps { 
                 sh "docker rmi suhastanmay/capstone:blue" 
             }
